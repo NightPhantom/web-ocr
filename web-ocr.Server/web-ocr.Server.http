@@ -1,0 +1,6 @@
+@web_ocr.Server_HostAddress = http://localhost:5121
+
+GET {{web_ocr.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
