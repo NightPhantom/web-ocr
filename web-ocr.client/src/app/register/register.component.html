@@ -1,0 +1,16 @@
+<h1>Register an account</h1>
+<form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm">
+  <div>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" ngModel required>
+  </div>
+  <div>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" ngModel required>
+  </div>
+  <div>
+    <label for="invitation">Invitation code:</label>
+    <input type="text" id="invitation" name="invitation" ngModel required>
+  </div>
+  <button type="submit" [disabled]="!registerForm.form.valid">Register</button>
+</form>

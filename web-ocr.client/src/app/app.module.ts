@@ -9,6 +9,7 @@ import { AppComponent } from './app.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { LoginComponent } from './login/login.component';
 import { AuthInterceptor } from './auth.interceptor';
+import { RegisterComponent } from './register/register.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -19,6 +20,7 @@ export function tokenGetter() {
     AppComponent,
     LoginComponent,
     DashboardComponent,
+    RegisterComponent,
   ],
   imports: [
     FormsModule,

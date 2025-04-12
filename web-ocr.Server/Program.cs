@@ -11,9 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    new MySqlServerVersion(new Version(8, 0, 21))));
+    options.UseMySql(
+        connectionString,
+        ServerVersion.AutoDetect(connectionString)
+    )
+);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -33,6 +37,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKeyThatIsLongEnough@34567890"))
         };
     });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+});
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 

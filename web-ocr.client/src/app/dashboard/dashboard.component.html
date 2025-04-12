@@ -1,1 +1,5 @@
-<h1>Dashboard</h1>
+<h1>Welcome {{ username }}</h1>
+
+<p>TODO: Upload and display image here.</p>
+
+<button *ngIf="isAdmin" (click)="generateInvitation()">Generate Invitation Code</button>
