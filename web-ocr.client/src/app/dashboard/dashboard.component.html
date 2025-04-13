@@ -1,5 +1,18 @@
 <h1>Welcome {{ username }}</h1>
 
-<p>TODO: Upload and display image here.</p>
+<div>
+  <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+  <button (click)="uploadImage()" [disabled]="!selectedFile">Upload Image</button>
+</div>
+
+<div *ngIf="selectedImage">
+  <h3>Selected Image:</h3>
+  <img [src]="selectedImage" alt="Selected Image" style="max-width: 100%; height: auto;" />
+</div>
+
+<div *ngIf="ocrResponse">
+  <h3>OCR Result:</h3>
+  <p>{{ ocrResponse.text }}</p>
+</div>
 
 <button *ngIf="isAdmin" (click)="generateInvitation()">Generate Invitation Code</button>

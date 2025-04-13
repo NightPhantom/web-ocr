@@ -5,10 +5,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using web_ocr.Server.Data;
 using web_ocr.Server.Models;
+using web_ocr.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddHttpClient();
 
 builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -45,6 +48,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+builder.Services.AddSingleton<AzureAIService>();
 
 if (builder.Environment.IsDevelopment())
 {
