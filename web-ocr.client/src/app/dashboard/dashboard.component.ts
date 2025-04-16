@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { HttpClient } from '@angular/common/http';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,7 +17,7 @@ export class DashboardComponent implements OnInit {
   selectedImage: string | null = null;
   ocrResponse: { text: string } | null = null;
 
-  constructor(private authService: AuthService, private http: HttpClient) { }
+  constructor(private authService: AuthService, private http: HttpClient, private clipboard: Clipboard) { }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -55,5 +56,9 @@ export class DashboardComponent implements OnInit {
 
   generateInvitation(): void {
     this.authService.generateInvitation();
+  }
+
+  copyToClipboard(text: string): void {
+    this.clipboard.copy(text);
   }
 }

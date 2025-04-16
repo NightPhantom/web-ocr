@@ -20,15 +20,24 @@ export class AuthService {
         this.setUsername(username);
         this.router.navigate(['dashboard']);
       },
-      error: (error) => {
-        console.error('Login error', error);
+      error: (err) => {
+        console.error('Login error', err);
         alert('Login failed.');
       }
     });
   }
 
-  register(username: string, password: string, invitation: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/register`, { username, password, invitation });
+  register(username: string, password: string, invitation: string) {
+    return this.http.post<any>(`${this.baseUrl}/register`, { username, password, invitation }).subscribe({
+      next: (response) => {
+        alert('Registration successful');
+        this.router.navigate(['login']);
+      },
+      error: (err) => {
+        console.error('Registration error', err);
+        alert('Registration failed.');
+      }
+    });
   }
 
   generateInvitation(): void {
@@ -54,9 +63,13 @@ export class AuthService {
 
   setUsername(username: string): void {
     this.username = username;
+    localStorage.setItem('username', username);
   }
 
   getUsername(): string {
+    if (!this.username) {
+      this.username = localStorage.getItem('username') || '';
+    }
     return this.username;
   }
 

@@ -1,16 +1,40 @@
-<h1>Register an account</h1>
-<form (ngSubmit)="onSubmit(registerForm)" #registerForm="ngForm">
-  <div>
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" ngModel required>
-  </div>
-  <div>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" ngModel required>
-  </div>
-  <div>
-    <label for="invitation">Invitation code:</label>
-    <input type="text" id="invitation" name="invitation" ngModel required>
-  </div>
-  <button type="submit" [disabled]="!registerForm.form.valid">Register</button>
-</form>
+<div class="registration-container">
+  <mat-card class="registration-content">
+
+    <h1>Register an account</h1>
+
+    <mat-card-content>
+      <form [formGroup]="registrationForm" (ngSubmit)="onRegister(registrationForm)">
+
+        <div>
+          <mat-form-field class="login-input">
+            <mat-label>Username</mat-label>
+            <input matInput type="text" id="username" formControlName="username" required>
+          </mat-form-field>
+        </div>
+
+        <div>
+          <mat-form-field class="login-input">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" id="password" formControlName="password" required>
+          </mat-form-field>
+        </div>
+
+        <div>
+          <mat-form-field class="login-input">
+            <mat-label>Invitation Code</mat-label>
+            <input matInput type="text" id="invitation" formControlName="invitation" required>
+          </mat-form-field>
+        </div>
+
+        <div class="button-container">
+          <button mat-raised-button type="submit" [disabled]="!registrationForm.valid">Register</button>
+        </div>
+
+      </form>
+    </mat-card-content>
+
+    <p>Already have an account? <a mat-button routerLink="/login">Login here</a></p>
+
+  </mat-card>
+</div>

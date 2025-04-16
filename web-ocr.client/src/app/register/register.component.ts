@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -8,20 +9,29 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./register.component.css'],
   standalone: false
 })
-export class RegisterComponent {
-  constructor(private authService: AuthService, private router: Router) { }
+export class RegisterComponent implements OnInit {
+  registrationForm: FormGroup;
+  constructor(private formBuilder: FormBuilder, private route: ActivatedRoute, private authService: AuthService) {
+    this.registrationForm = this.formBuilder.group({
+      username: ['', Validators.required],
+      password: ['', Validators.required],
+      invitation: ['', Validators.required]
+    });
+  }
 
-  onSubmit(form: any): void {
-    const { username, password, invitation } = form.value;
-    this.authService.register(username, password, invitation).subscribe({
-      next: () => {
-        alert('Registration successful');
-        this.router.navigate(['/login']);
-      },
-      error: (err: any) => {
-        console.error('Registration error', err);
-        alert('Registration failed.');
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      const invitationCode = params['invitation'];
+      if (invitationCode) {
+        this.registrationForm.get('invitation')?.setValue(invitationCode);
       }
     });
+  }
+
+  onRegister(form: any): void {
+    if (this.registrationForm.valid) {
+      const { username, password, invitation } = form.value;
+      this.authService.register(username, password, invitation);
+    }
   }
 }

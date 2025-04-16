@@ -1,3 +1,22 @@
-<h1 id="tableLabel">Web OCR (Powered by Azure AI)</h1>
+<header class="app-header">
+  <mat-toolbar>
+    <mat-toolbar-row>
+      <span class="title">Web OCR</span>
+      <span class="subtitle">(Powered by Azure AI)</span>
+    </mat-toolbar-row>
+    <mat-toolbar-row>
+      <button mat-button routerLink="/login">Login</button>
+      <button mat-button routerLink="/register">Register</button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+</header>
 
-<router-outlet></router-outlet>
+<main class="app-main-content">
+  <mat-card>
+    <router-outlet></router-outlet>
+  </mat-card>
+</main>
+
+<footer class="app-footer">
+  <p>&copy; 2025 Andy Costa. All rights reserved.</p>
+</footer>
