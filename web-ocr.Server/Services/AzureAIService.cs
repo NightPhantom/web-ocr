@@ -9,6 +9,7 @@ namespace web_ocr.Server.Services
     public class AzureAIService
     {
         private ImageAnalysisClient _imageClient;
+        private readonly IConfiguration _configuration;
 
         public AzureAIService(IConfiguration configuration)
         {
@@ -18,6 +19,8 @@ namespace web_ocr.Server.Services
             var computerVisionUri = new Uri(computerVisionEndpoint);
             var computerVisionCredentials = new AzureKeyCredential(computerVisionKey);
             _imageClient = new ImageAnalysisClient(computerVisionUri, computerVisionCredentials);
+
+            _configuration = configuration;
         }
 
         public async Task<string> AnalizeImageAsync(byte[] imageBytes)
@@ -25,10 +28,10 @@ namespace web_ocr.Server.Services
             var imageBinaryData = new BinaryData(imageBytes);
             var imageAnalysisResult = await _imageClient.AnalyzeAsync(imageBinaryData, VisualFeatures.Read);
 
-            return GetAnalysisResultString(imageAnalysisResult.Value);
+            return GetAnalysisResultString(imageAnalysisResult.Value, _configuration.GetSection("OCRSettings"));
         }
 
-        private static string GetAnalysisResultString(ImageAnalysisResult result)
+        private static string GetAnalysisResultString(ImageAnalysisResult result, IConfigurationSection ocrSettings)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -43,7 +46,7 @@ namespace web_ocr.Server.Services
                 {
                     foreach (var line in block.Lines)
                     {
-                        if (line.Words.All(word => word.Confidence >= 0.5f))
+                        if (line.Words.All(word => word.Confidence >= ocrSettings.GetValue<float>("WordConfidenceThreshold", 0.5f)))
                         {
                             sb.AppendLine(line.Text);
                         }

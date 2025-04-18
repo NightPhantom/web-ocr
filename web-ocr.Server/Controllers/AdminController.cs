@@ -13,16 +13,22 @@ namespace web_ocr.Server.Controllers
     public class AdminController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         [Authorize(Policy = "AdminOnly")]
         [HttpPost("generate-invitation")]
-        public async Task<IActionResult> GenerateInvitation(int validDays = 7)
+        public async Task<IActionResult> GenerateInvitation(int? validDays = null)
         {
+            // Get default valid days from configuration, or use provided value
+            int defaultValidDays = _configuration.GetValue<int>("InvitationSettings:DefaultValidDays", 7);
+            int daysToUse = validDays ?? defaultValidDays;
+
             // Confirm that user is admin
             var username = User.Identity?.Name;
             if (username == null)
@@ -45,7 +51,7 @@ namespace web_ocr.Server.Controllers
             var invitation = new Invitation
             {
                 ValueHash = hashedInvitation,
-                ExpiresAt = DateTime.UtcNow.AddDays(validDays)
+                ExpiresAt = DateTime.UtcNow.AddDays(daysToUse)
             };
 
             // Save the invitation to the database

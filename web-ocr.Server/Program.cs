@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using web_ocr.Server.Data;
@@ -26,6 +27,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -35,9 +37,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Environment.IsDevelopment() ? "http://localhost:7063" : "https://web-ocr.andrescosta.com",
-            ValidAudience = builder.Environment.IsDevelopment() ? "http://localhost:7063" : "https://web-ocr.andrescosta.com",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKeyThatIsLongEnough@34567890"))
+            ValidIssuer = jwtSettings["ValidIssuer"],
+            ValidAudience = jwtSettings["ValidAudience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["IssuerSigningKey"] ?? throw new InvalidConfigurationException("IssuerSigningKey")))
         };
 
         options.Events = new JwtBearerEvents
@@ -65,27 +67,14 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddSingleton<AzureAIService>();
 
-if (builder.Environment.IsDevelopment())
+var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>();
+builder.Services.AddCors(options =>
 {
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowSpecificOrigin",
-            builder => builder.WithOrigins("https://localhost:51241")
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-    });
-}
-else
-{
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowSpecificOrigin",
-            builder => builder.WithOrigins("https://web-ocr.andrescosta.com")
-            .WithHeaders("Content-Type", "Authorization")
-            .WithMethods("GET", "POST")
-            .AllowCredentials());
-    });
-}
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins(corsOrigins ?? [])
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
 
 var app = builder.Build();
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -21,11 +22,13 @@ namespace web_ocr.Server.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
+        public AuthController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
@@ -41,10 +44,10 @@ namespace web_ocr.Server.Controllers
                 if (passwordVerification == PasswordVerificationResult.Success)
                 {
                     // Generate JWT access token
-                    var accessToken = GenerateAccessToken(user);
+                    var accessToken = GenerateAccessToken(user, _configuration.GetSection("JwtSettings"));
 
                     // Generate JWT refresh token
-                    var refreshToken = GenerateRefreshToken(user);
+                    var refreshToken = GenerateRefreshToken(user, _configuration.GetSection("JwtSettings"));
 
                     // Update the user's last login time and save refresh token
                     user.LastLogin = DateTime.UtcNow;
@@ -77,10 +80,10 @@ namespace web_ocr.Server.Controllers
             }
 
             // Generate new JWT access token
-            var newAccessToken = GenerateAccessToken(user);
+            var newAccessToken = GenerateAccessToken(user, _configuration.GetSection("JwtSettings"));
 
             // Generate new JWT refresh token
-            var newRefreshToken = GenerateRefreshToken(user);
+            var newRefreshToken = GenerateRefreshToken(user, _configuration.GetSection("JwtSettings"));
             refreshToken.Token = newRefreshToken.Token;
             refreshToken.ExpiresAt = newRefreshToken.ExpiresAt;
             await _context.SaveChangesAsync();
@@ -149,10 +152,10 @@ namespace web_ocr.Server.Controllers
             return Ok();
         }
 
-        private static string GenerateAccessToken(User user)
+        private static string GenerateAccessToken(User user, IConfigurationSection jwtSettings)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("superSecretKeyThatIsLongEnough@34567890");
+            var key = Encoding.ASCII.GetBytes(jwtSettings["IssuerSigningKey"] ?? throw new InvalidConfigurationException("IssuerSigningKey"));
             var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -161,9 +164,9 @@ namespace web_ocr.Server.Controllers
                     new Claim(ClaimTypes.Name, user.Username),
                     new Claim(ClaimTypes.Role, user.Type.ToString())
                 }),
-                Expires = DateTime.UtcNow.AddHours(1),
-                Issuer = isDevelopment ? "http://localhost:7063" : "https://web-ocr.andrescosta.com",
-                Audience = isDevelopment ? "http://localhost:7063" : "https://web-ocr.andrescosta.com",
+                Expires = DateTime.UtcNow.AddHours(jwtSettings.GetValue<int>("AccessTokenExpirationMinutes", 60)),
+                Issuer = jwtSettings["ValidIssuer"],
+                Audience = jwtSettings["ValidAudience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -171,12 +174,13 @@ namespace web_ocr.Server.Controllers
             return tokenString;
         }
 
-        private static RefreshToken GenerateRefreshToken(User user)
+        private static RefreshToken GenerateRefreshToken(User user, IConfigurationSection jwtSettings)
         {
             return new RefreshToken
             {
                 Token = Guid.NewGuid().ToString(),
-                UserId = user.Id
+                UserId = user.Id,
+                ExpiresAt = DateTime.UtcNow.AddDays(jwtSettings.GetValue<int>("RefreshTokenExpirationDays", 7))
             };
         }
     }
