@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
-import { Clipboard } from '@angular/cdk/clipboard';
 import { HttpClient } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
+import { InvitationDialogComponent } from '../invitation-dialog/invitation-dialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-admin',
@@ -15,7 +17,12 @@ export class AdminComponent implements OnInit {
   username: string = '';
   isAdmin: boolean = false;
 
-  constructor(private authService: AuthService, private clipboard: Clipboard, private http: HttpClient) { }
+  constructor(
+    private authService: AuthService,
+    private http: HttpClient,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
+  ) { }
 
   ngOnInit(): void {
     this.username = this.authService.getUsername();
@@ -23,17 +30,21 @@ export class AdminComponent implements OnInit {
   }
 
   generateInvitation(): void {
+    const registrationUrl = 'https://localhost:51241/register'
     this.http.post<{ invitationCode: string }>(`${this.baseUrl}/generate-invitation`, {}).subscribe({
       next: (response) => {
         console.log('Generated Invitation Code:', response.invitationCode);
-        alert(`Invitation Code: ${response.invitationCode}`);
+        this.dialog.open(InvitationDialogComponent, {
+          data: { invitationCode: `${registrationUrl}?invitation=${response.invitationCode}` }
+        });
       },
       error: (error) => {
         console.error('Error generating invitation code:', error);
-        alert('Failed to generate invitation code.');
-      },
-      complete: () => {
-        console.log('Invitation generation request completed.');
+        this.snackBar.open('Error generating invitation code.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
       }
     });
   }

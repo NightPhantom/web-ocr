@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { jwtDecode } from "jwt-decode";
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,11 @@ export class AuthService {
   private baseUrl = 'https://localhost:7063/api/Auth';
   private username: string = '';
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) { }
 
   login(username: string, password: string) {
     return this.http.post<any>(`${this.baseUrl}/login`, { username, password }).subscribe({
@@ -23,7 +28,11 @@ export class AuthService {
       },
       error: (err) => {
         console.error('Login error', err);
-        alert('Login failed.');
+        this.snackBar.open('Login failed.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
       }
     });
   }
@@ -48,15 +57,24 @@ export class AuthService {
     );
   }
 
-  register(username: string, password: string, invitation: string) {
-    return this.http.post<any>(`${this.baseUrl}/register`, { username, password, invitation }).subscribe({
+  register(username: string, password: string, invitationCode: string) {
+    return this.http.post<any>(`${this.baseUrl}/register`, { username, password, invitationCode }).subscribe({
       next: (response) => {
-        alert('Registration successful');
+        console.log('Registration successful');
+        this.snackBar.open('Registration successful. Please log in.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
         this.router.navigate(['login']);
       },
       error: (err) => {
         console.error('Registration error', err);
-        alert('Registration failed.');
+        this.snackBar.open('Registration failed.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
       }
     });
   }

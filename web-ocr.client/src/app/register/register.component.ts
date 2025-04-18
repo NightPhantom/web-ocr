@@ -15,7 +15,7 @@ export class RegisterComponent implements OnInit {
     this.registrationForm = this.formBuilder.group({
       username: ['', Validators.required],
       password: ['', Validators.required],
-      invitation: ['', Validators.required]
+      invitationCode: ['', Validators.required]
     });
   }
 
@@ -23,15 +23,15 @@ export class RegisterComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       const invitationCode = params['invitation'];
       if (invitationCode) {
-        this.registrationForm.get('invitation')?.setValue(invitationCode);
+        this.registrationForm.get('invitationCode')?.setValue(invitationCode);
       }
     });
   }
 
   onRegister(form: any): void {
     if (this.registrationForm.valid) {
-      const { username, password, invitation } = form.value;
-      this.authService.register(username, password, invitation);
+      const { username, password, invitationCode } = form.value;
+      this.authService.register(username, password, invitationCode);
     }
   }
 }

@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -19,6 +20,7 @@ import { LoginComponent } from './login/login.component';
 import { AuthInterceptor } from './auth.interceptor';
 import { RegisterComponent } from './register/register.component';
 import { AdminComponent } from './admin/admin.component';
+import { InvitationDialogComponent } from './invitation-dialog/invitation-dialog.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -31,6 +33,7 @@ export function tokenGetter() {
     DashboardComponent,
     RegisterComponent,
     AdminComponent,
+    InvitationDialogComponent,
   ],
   imports: [
     FormsModule,
@@ -52,6 +55,7 @@ export function tokenGetter() {
     MatFormFieldModule,
     MatIconModule,
     MatDialogModule,
+    MatSnackBarModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

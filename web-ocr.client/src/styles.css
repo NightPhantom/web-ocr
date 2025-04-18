@@ -53,6 +53,24 @@ mat-card-title {
   color: var(--mat-sys-primary);
 }
 
+/*#region Dashboard*/
+.instruction-container {
+  color: var(--mat-sys-primary);
+  margin-top: 10px;
+  text-align: left;
+  border-radius: 8px;
+  box-shadow: var(--mat-sys-level5);
+  padding: 20px;
+}
+
+.instruction-title {
+  font-size: var(--mat-sys-label-large-size);
+}
+
+.instruction-text {
+  font-size: var(--mat-sys-label-medium-size);
+}
+
 .file-upload-container {
   margin-top: 10px;
   display: flex;
@@ -109,3 +127,41 @@ mat-card.ocr-result-card {
 .ocr-result-text {
     white-space: pre-wrap;
 }
+/*#endregion Dashboard*/
+
+.admin-invitation-container {
+  margin-top: 10px;
+  text-align: center;
+  gap: 20px;
+  border-radius: 8px;
+  box-shadow: var(--mat-sys-level5);
+  padding: 20px;
+}
+
+/*#region Invitation dialog*/
+.invitation-dialog-container {
+  color: var(--mat-sys-primary);
+  margin-top: 10px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--mat-sys-level5);
+  padding: 20px;
+}
+
+mat-card.invitation-dialog-card {
+  color: var(--mat-sys-on-surface);
+  border: 4px solid var(--mat-sys-outline);
+  position: relative;
+  padding: 2rem;
+}
+
+.invitation-dialog-header {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.invitation-dialog-text {
+  white-space: pre-wrap;
+}
+/*#endregion Invitation dialog*/

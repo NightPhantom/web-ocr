@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,8 +16,14 @@ export class DashboardComponent implements OnInit {
   selectedFile: File | null = null;
   selectedImage: string | null = null;
   ocrResponse: { text: string } | null = null;
+  @ViewChild('resultContainer') resultContainer!: ElementRef;
 
-  constructor(private authService: AuthService, private http: HttpClient, private clipboard: Clipboard) { }
+  constructor(
+    private authService: AuthService,
+    private http: HttpClient,
+    private clipboard: Clipboard,
+    private snackBar: MatSnackBar
+  ) { }
 
   ngOnInit(): void {
     this.username = this.authService.getUsername();
@@ -46,6 +53,9 @@ export class DashboardComponent implements OnInit {
     this.http.post<{ text: string }>(`${this.baseUrl}/process-image`, formData).subscribe({
       next: (response) => {
         this.ocrResponse = response;
+        setTimeout(() => {
+          this.resultContainer?.nativeElement.scrollIntoView({ behavior: 'smooth' });
+        }, 1);
       },
       error: (err) => {
         console.error('Error processing image.', err);
@@ -54,9 +64,13 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  copyToClipboard(text: string): void {
+  copyToClipboard(text: string, confirmationMessage: string): void {
     if (this.clipboard.copy(text)) {
-
+      this.snackBar.open(confirmationMessage, 'Close', {
+        duration: 3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top'
+      });
     }
   }
 }

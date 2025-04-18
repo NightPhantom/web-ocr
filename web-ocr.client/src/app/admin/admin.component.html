@@ -9,7 +9,9 @@
     </mat-card-header>
 
     <mat-card-content>
-      <button mat-raised-button *ngIf="isAdmin" (click)="generateInvitation()">Generate Invitation Code</button>
+      <div class="admin-invitation-container">
+        <button mat-raised-button *ngIf="isAdmin" (click)="generateInvitation()">Generate Invitation Code</button>
+      </div>
     </mat-card-content>
 
   </mat-card>

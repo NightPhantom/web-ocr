@@ -7,6 +7,13 @@
 
     <mat-card-content>
 
+      <div class="instruction-container">
+        <mat-card class="instruction-card">
+          <span class="instruction-title">How to use:</span>
+          <span class="instruction-text">Pick an image file with visible text, then click the Analyze button to extract the text from the image.</span>
+        </mat-card>
+      </div>
+
       <div class="file-upload-container">
         <button mat-raised-button (click)="fileInput.click()">Choose Image File</button>
         <input #fileInput hidden type="file" (change)="onFileSelected($event)" accept="image/*" />
@@ -18,11 +25,11 @@
         <img [src]="selectedImage" alt="Selected Image" class="image-preview" />
       </div>
 
-      <div *ngIf="ocrResponse" class="ocr-result-container">
+      <div *ngIf="ocrResponse" class="ocr-result-container" #resultContainer>
         <p>Analysis Result:</p>
         <mat-card class="ocr-result-card">
           <div class="ocr-result-header">
-            <button mat-icon-button type="button" (click)="copyToClipboard(ocrResponse.text)" matTooltip="Copy extracted text" title="Copy extracted text" aria-label="Copy extracted text to clipboard">
+            <button mat-icon-button type="button" (click)="copyToClipboard(ocrResponse.text, 'Extracted text copied to clipboard')" matTooltip="Copy extracted text" title="Copy extracted text" aria-label="Copy extracted text to clipboard">
               <mat-icon>content_copy</mat-icon>
             </button>
           </div>

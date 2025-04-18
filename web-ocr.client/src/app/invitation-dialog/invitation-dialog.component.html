@@ -1,0 +1,22 @@
+<mat-card-header>
+  <mat-card-title>
+    <span class="title">Invitation code</span>
+  </mat-card-title>
+</mat-card-header>
+
+<mat-dialog-content>
+  <div class="invitation-dialog-container">
+    <mat-card class="invitation-dialog-card">
+      <div class="invitation-dialog-header">
+        <button mat-icon-button type="button" (click)="copyToClipboard(data.invitationCode, 'Invidation code copied to clipboard')" matTooltip="Copy inviation code to clipboard" title="Copy inviation code to clipboard" aria-label="Copy inviation code to clipboard">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      </div>
+      <p class="invitation-dialog-text">{{ data.invitationCode }}</p>
+    </mat-card>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>
