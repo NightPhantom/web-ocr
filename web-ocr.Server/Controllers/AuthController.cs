@@ -29,38 +29,85 @@ namespace web_ocr.Server.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] Login login)
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == login.Username);
+            // Find the user by username
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == loginRequest.Username);
 
-            if (user != null)
+            if (user != null && user.Status == UserStatus.Active)
             {
-                var passwordVerification = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, login.Password);
+                // Verify the password
+                var passwordVerification = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, loginRequest.Password);
                 if (passwordVerification == PasswordVerificationResult.Success)
                 {
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var key = Encoding.ASCII.GetBytes("superSecretKeyThatIsLongEnough@34567890");
-                    var tokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Subject = new ClaimsIdentity(new Claim[]
-                        {
-                            new Claim(ClaimTypes.Name, login.Username),
-                            new Claim(ClaimTypes.Role, user.Type.ToString())
-                        }),
-                        Expires = DateTime.UtcNow.AddHours(1),
-                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                    };
-                    var token = tokenHandler.CreateToken(tokenDescriptor);
-                    var tokenString = tokenHandler.WriteToken(token);
+                    // Generate JWT access token
+                    var accessToken = GenerateAccessToken(user);
 
+                    // Generate JWT refresh token
+                    var refreshToken = GenerateRefreshToken(user);
+
+                    // Update the user's last login time and save refresh token
                     user.LastLogin = DateTime.UtcNow;
+                    _context.RefreshTokens.Add(refreshToken);
                     await _context.SaveChangesAsync();
 
-                    return Ok(new { Token = tokenString });
+                    // Return the tokens
+                    return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken.Token });
                 }
             }
 
             return Unauthorized();
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            // Validate the refresh token
+            var refreshToken = await _context.RefreshTokens.SingleOrDefaultAsync(rt => rt.Token == request.RefreshToken);
+            if (refreshToken == null || refreshToken.ExpiresAt < DateTime.UtcNow)
+            {
+                return Unauthorized("Invalid or expired refresh token.");
+            }
+
+            // Get the user associated with the refresh token
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == refreshToken.UserId);
+            if (user == null || user.Status != UserStatus.Active)
+            {
+                return Unauthorized("User is not authorized.");
+            }
+
+            // Generate new JWT access token
+            var newAccessToken = GenerateAccessToken(user);
+
+            // Generate new JWT refresh token
+            var newRefreshToken = GenerateRefreshToken(user);
+            refreshToken.Token = newRefreshToken.Token;
+            refreshToken.ExpiresAt = newRefreshToken.ExpiresAt;
+            await _context.SaveChangesAsync();
+
+            // Return the new tokens
+            return Ok(new { AccessToken = newAccessToken, RefreshToken = newRefreshToken.Token });
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
+        {
+            // Find the refresh token in the database
+            var refreshToken = await _context.RefreshTokens.SingleOrDefaultAsync(rt => rt.Token == request.RefreshToken);
+            if (refreshToken == null)
+            {
+                return NotFound("Refresh token not found.");
+            }
+
+            // Revoke the token
+            refreshToken.IsRevoked = true;
+
+            // Save changes
+            await _context.SaveChangesAsync();
+
+            // Return success response
+            return Ok("Logged out successfully.");
         }
 
         [HttpPost("register")]
@@ -81,7 +128,7 @@ namespace web_ocr.Server.Controllers
             if (invitationRecord == null)
             {
                 return BadRequest("Invalid or expired invitation code.");
-            }    
+            }
 
             // Create the new user
             var user = new User
@@ -102,41 +149,35 @@ namespace web_ocr.Server.Controllers
             return Ok();
         }
 
-        [Authorize(Policy = "AdminOnly")]
-        [HttpPost("generate-invitation")]
-        public async Task<IActionResult> GenerateInvitation(int validDays = 7)
+        private static string GenerateAccessToken(User user)
         {
-            // Confirm that user is admin
-            var username = User.Identity?.Name;
-            if (username == null)
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes("superSecretKeyThatIsLongEnough@34567890");
+            var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                return Unauthorized("User is not authenticated.");
-            }
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
-            if (user == null || user.Type != UserType.Admin)
-            {
-                return Forbid("Only admin users can generate invitations.");
-            }
-
-            // Generate a new invitation code
-            var invitationCode = Guid.NewGuid().ToString("N");
-
-            // Hash the invitation code
-            var hashedInvitation = HashingHelper.HashWithoutSalt(invitationCode);
-
-            // Create a new invitation record
-            var invitation = new Invitation
-            {
-                ValueHash = hashedInvitation,
-                ExpiresAt = DateTime.UtcNow.AddDays(validDays)
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Role, user.Type.ToString())
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                Issuer = isDevelopment ? "http://localhost:7063" : "https://web-ocr.andrescosta.com",
+                Audience = isDevelopment ? "http://localhost:7063" : "https://web-ocr.andrescosta.com",
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+            return tokenString;
+        }
 
-            // Save the invitation to the database
-            _context.Invitations.Add(invitation);
-            await _context.SaveChangesAsync();
-
-            // Return the invitation code
-            return Ok(new { InvitationCode = invitationCode });
+        private static RefreshToken GenerateRefreshToken(User user)
+        {
+            return new RefreshToken
+            {
+                Token = Guid.NewGuid().ToString(),
+                UserId = user.Id
+            };
         }
     }
 }

@@ -5,8 +5,15 @@
       <span class="subtitle">(Powered by Azure AI)</span>
     </mat-toolbar-row>
     <mat-toolbar-row>
-      <button mat-button routerLink="/login">Login</button>
-      <button mat-button routerLink="/register">Register</button>
+      <ng-container *ngIf="!authService.isLoggedIn(); else loggedIn">
+        <button mat-button routerLink="/login">Login</button>
+        <button mat-button routerLink="/register">Register</button>
+      </ng-container>
+      <ng-template #loggedIn>
+        <button mat-button routerLink="/dashboard">Home</button>
+        <button mat-button *ngIf="authService.isAdmin()" routerLink="/admin">Admin</button>
+        <button mat-button (click)="logout()">Logout</button>
+      </ng-template>
     </mat-toolbar-row>
   </mat-toolbar>
 </header>

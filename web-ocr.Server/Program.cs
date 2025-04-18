@@ -39,6 +39,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Environment.IsDevelopment() ? "http://localhost:7063" : "https://web-ocr.andrescosta.com",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKeyThatIsLongEnough@34567890"))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("Token validated successfully.");
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization(options =>
@@ -86,10 +100,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowSpecificOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors("AllowSpecificOrigin");
 
 app.MapControllers();
 

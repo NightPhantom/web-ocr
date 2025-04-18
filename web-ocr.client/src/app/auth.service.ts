@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { jwtDecode } from "jwt-decode";
 
 @Injectable({
@@ -16,7 +16,8 @@ export class AuthService {
   login(username: string, password: string) {
     return this.http.post<any>(`${this.baseUrl}/login`, { username, password }).subscribe({
       next: (response) => {
-        localStorage.setItem('access_token', response.token);
+        localStorage.setItem('access_token', response.accessToken);
+        localStorage.setItem('refresh_token', response.refreshToken);
         this.setUsername(username);
         this.router.navigate(['dashboard']);
       },
@@ -25,6 +26,26 @@ export class AuthService {
         alert('Login failed.');
       }
     });
+  }
+
+  isTokenExpired(): boolean {
+    const token = localStorage.getItem('access_token');
+    if (!token) return true;
+
+    const decoded: any = jwtDecode(token);
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decoded.exp < currentTime;
+  }
+
+  refreshToken(): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/refresh-token`, {
+      refreshToken: localStorage.getItem('refresh_token')
+    }).pipe(
+      tap((response) => {
+        localStorage.setItem('access_token', response.accessToken);
+        localStorage.setItem('refresh_token', response.refreshToken);
+      })
+    );
   }
 
   register(username: string, password: string, invitation: string) {
@@ -40,24 +61,22 @@ export class AuthService {
     });
   }
 
-  generateInvitation(): void {
-    this.http.post<{ invitationCode: string }>(`${this.baseUrl}/generate-invitation`, {}).subscribe({
-      next: (response) => {
-        console.log('Generated Invitation Code:', response.invitationCode);
-        alert(`Invitation Code: ${response.invitationCode}`);
-      },
-      error: (error) => {
-        console.error('Error generating invitation code:', error);
-        alert('Failed to generate invitation code.');
-      },
-      complete: () => {
-        console.log('Invitation generation request completed.');
-      }
-    });
-  }
-
   logout() {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      this.http.post(`${this.baseUrl}/logout`, { refreshToken }).subscribe({
+        next: () => {
+          console.log('Logout successful');
+        },
+        error: (err) => {
+          console.error('Logout error', err);
+        }
+      });
+    }
+
+    // We tried, regardless of outcome we clear the tokens
     localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
     this.router.navigate(['login']);
   }
 
@@ -86,7 +105,15 @@ export class AuthService {
     }
   }
 
-  public get loggedIn(): boolean {
-    return localStorage.getItem('access_token') !== null;
+  getAccessToken(): string | null {
+    return localStorage.getItem('access_token');
+  }
+
+  isLoggedIn(): boolean {
+    return localStorage.getItem('access_token') !== null && !this.isTokenExpired();
+  }
+
+  isAdmin(): boolean {
+    return this.isLoggedIn() && this.getRole() === 'Admin'
   }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
@@ -17,6 +18,7 @@ namespace web_ocr.Server.Controllers
             _azureAIService = azureAIService;
         }
 
+        [Authorize]
         [HttpPost("process-image")]
         public async Task<IActionResult> ProcessImage(IFormFile image)
         {

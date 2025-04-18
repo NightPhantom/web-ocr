@@ -12,14 +12,18 @@ import { Clipboard } from '@angular/cdk/clipboard';
 export class DashboardComponent implements OnInit {
   private baseUrl = 'https://localhost:7063/api/OCR';
   username: string = '';
-  isAdmin: boolean = false;
   selectedFile: File | null = null;
   selectedImage: string | null = null;
   ocrResponse: { text: string } | null = null;
 
   constructor(private authService: AuthService, private http: HttpClient, private clipboard: Clipboard) { }
 
+  ngOnInit(): void {
+    this.username = this.authService.getUsername();
+  }
+
   onFileSelected(event: Event): void {
+    this.ocrResponse = null;
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedFile = input.files[0];
@@ -33,6 +37,7 @@ export class DashboardComponent implements OnInit {
   }
 
   uploadImage(): void {
+    this.ocrResponse = null;
     if (!this.selectedFile) return;
 
     const formData = new FormData();
@@ -49,16 +54,9 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.username = this.authService.getUsername();
-    this.isAdmin = this.authService.getRole() === 'admin';
-  }
-
-  generateInvitation(): void {
-    this.authService.generateInvitation();
-  }
-
   copyToClipboard(text: string): void {
-    this.clipboard.copy(text);
+    if (this.clipboard.copy(text)) {
+
+    }
   }
 }

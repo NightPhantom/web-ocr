@@ -23,5 +23,7 @@ namespace web_ocr.Server.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime LastLogin { get; set; } = DateTime.UtcNow;
+
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }

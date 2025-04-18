@@ -9,6 +9,8 @@ namespace web_ocr.Server.Data
 
         public DbSet<Invitation> Invitations { get; set; }
 
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :base(options)
         {
         }
@@ -23,6 +25,10 @@ namespace web_ocr.Server.Data
 
             modelBuilder.Entity<Invitation>()
                 .HasIndex(i => i.UserId)
+                .IsUnique();
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(rt => rt.Token)
                 .IsUnique();
         }
     }

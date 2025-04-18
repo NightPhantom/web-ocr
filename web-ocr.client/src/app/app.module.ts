@@ -1,4 +1,4 @@
-import { HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { JwtModule } from '@auth0/angular-jwt';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -17,6 +18,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { LoginComponent } from './login/login.component';
 import { AuthInterceptor } from './auth.interceptor';
 import { RegisterComponent } from './register/register.component';
+import { AdminComponent } from './admin/admin.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -28,10 +30,12 @@ export function tokenGetter() {
     LoginComponent,
     DashboardComponent,
     RegisterComponent,
+    AdminComponent,
   ],
   imports: [
     FormsModule,
     BrowserModule,
+    HttpClientModule,
     AppRoutingModule,
     JwtModule.forRoot({
       config: {
@@ -47,10 +51,11 @@ export function tokenGetter() {
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,
+    MatDialogModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    provideHttpClient()],
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
