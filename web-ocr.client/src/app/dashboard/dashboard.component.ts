@@ -3,6 +3,7 @@ import { AuthService } from '../auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   standalone: false
 })
 export class DashboardComponent implements OnInit {
-  private baseUrl = 'https://localhost:7063/api/OCR';
+  private apiBaseUrl = `${environment.apiBaseUrl}/OCR`;
   username: string = '';
   selectedFile: File | null = null;
   selectedImage: string | null = null;
@@ -50,7 +51,7 @@ export class DashboardComponent implements OnInit {
     const formData = new FormData();
     formData.append('image', this.selectedFile);
 
-    this.http.post<{ text: string }>(`${this.baseUrl}/process-image`, formData).subscribe({
+    this.http.post<{ text: string }>(`${this.apiBaseUrl}/process-image`, formData).subscribe({
       next: (response) => {
         this.ocrResponse = response;
         setTimeout(() => {

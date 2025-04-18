@@ -4,12 +4,13 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { jwtDecode } from "jwt-decode";
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'https://localhost:7063/api/Auth';
+  private apiBaseUrl = `${environment.apiBaseUrl}/Auth`;
   private username: string = '';
 
   constructor(
@@ -19,7 +20,7 @@ export class AuthService {
   ) { }
 
   login(username: string, password: string) {
-    return this.http.post<any>(`${this.baseUrl}/login`, { username, password }).subscribe({
+    return this.http.post<any>(`${this.apiBaseUrl}/login`, { username, password }).subscribe({
       next: (response) => {
         localStorage.setItem('access_token', response.accessToken);
         localStorage.setItem('refresh_token', response.refreshToken);
@@ -47,7 +48,7 @@ export class AuthService {
   }
 
   refreshToken(): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/refresh-token`, {
+    return this.http.post<any>(`${this.apiBaseUrl}/refresh-token`, {
       refreshToken: localStorage.getItem('refresh_token')
     }).pipe(
       tap((response) => {
@@ -58,7 +59,7 @@ export class AuthService {
   }
 
   register(username: string, password: string, invitationCode: string) {
-    return this.http.post<any>(`${this.baseUrl}/register`, { username, password, invitationCode }).subscribe({
+    return this.http.post<any>(`${this.apiBaseUrl}/register`, { username, password, invitationCode }).subscribe({
       next: (response) => {
         console.log('Registration successful');
         this.snackBar.open('Registration successful. Please log in.', 'Close', {
@@ -82,7 +83,7 @@ export class AuthService {
   logout() {
     const refreshToken = localStorage.getItem('refresh_token');
     if (refreshToken) {
-      this.http.post(`${this.baseUrl}/logout`, { refreshToken }).subscribe({
+      this.http.post(`${this.apiBaseUrl}/logout`, { refreshToken }).subscribe({
         next: () => {
           console.log('Logout successful');
         },

@@ -21,6 +21,7 @@ import { AuthInterceptor } from './auth.interceptor';
 import { RegisterComponent } from './register/register.component';
 import { AdminComponent } from './admin/admin.component';
 import { InvitationDialogComponent } from './invitation-dialog/invitation-dialog.component';
+import { environment } from '../environments/environment';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -43,8 +44,8 @@ export function tokenGetter() {
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
-        allowedDomains: ['localhost:7063'],
-        disallowedRoutes: ['localhost:7063/api/auth/']
+        allowedDomains: [environment.apiBaseUrl],
+        disallowedRoutes: [`${environment.apiBaseUrl}/auth/`]
       }
     }),
     ReactiveFormsModule,

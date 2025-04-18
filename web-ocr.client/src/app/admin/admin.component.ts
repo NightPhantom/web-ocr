@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { InvitationDialogComponent } from '../invitation-dialog/invitation-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-admin',
@@ -13,7 +14,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 
 export class AdminComponent implements OnInit {
-  private baseUrl = 'https://localhost:7063/api/Admin';
+  private apiBaseUrl = `${environment.apiBaseUrl}/Admin`;
   username: string = '';
   isAdmin: boolean = false;
 
@@ -31,7 +32,7 @@ export class AdminComponent implements OnInit {
 
   generateInvitation(): void {
     const registrationUrl = 'https://localhost:51241/register'
-    this.http.post<{ invitationCode: string }>(`${this.baseUrl}/generate-invitation`, {}).subscribe({
+    this.http.post<{ invitationCode: string }>(`${this.apiBaseUrl}/generate-invitation`, {}).subscribe({
       next: (response) => {
         console.log('Generated Invitation Code:', response.invitationCode);
         this.dialog.open(InvitationDialogComponent, {
