@@ -15,7 +15,7 @@ namespace web_ocr.Server.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "Username",
                 table: "Users",
-                type: "varchar(255)",
+                type: "varchar(100)",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "longtext")
@@ -118,7 +118,7 @@ namespace web_ocr.Server.Migrations
                 type: "longtext",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "varchar(255)")
+                oldType: "varchar(100)")
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
         }

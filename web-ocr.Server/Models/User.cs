@@ -11,6 +11,7 @@ namespace web_ocr.Server.Models
         public int Id { get; set; }
 
         [Required]
+        [MaxLength(100)]
         public required string Username { get; set; }
 
         [Required]
