@@ -31,7 +31,8 @@ export class AdminComponent implements OnInit {
   }
 
   generateInvitation(): void {
-    const registrationUrl = 'https://localhost:51241/register'
+    const currentDomain = window.location.origin;
+    const registrationUrl = `${currentDomain}/register`;
     this.http.post<{ invitationCode: string }>(`${this.apiBaseUrl}/generate-invitation`, {}).subscribe({
       next: (response) => {
         console.log('Generated Invitation Code:', response.invitationCode);
