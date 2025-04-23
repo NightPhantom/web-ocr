@@ -138,6 +138,42 @@ mat-card.ocr-result-card {
   padding: 20px;
 }
 
+.about-body-container {
+  margin-top: 10px;
+  text-align: center;
+  gap: 20px;
+  border-radius: 8px;
+  box-shadow: var(--mat-sys-level5);
+  padding: 20px;
+}
+
+.about-card {
+  box-shadow: var(--mat-sys-level5);
+  margin: 20px;
+  padding: 20px;
+}
+
+.about-card-title {
+  color: var(--mat-sys-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.about-card-text {
+  margin: 10px;
+  text-align: left;
+}
+
+mat-list-item{
+    text-align: left;
+}
+
+mat-icon {
+    vertical-align: middle;
+}
+
 /*#region Invitation dialog*/
 .invitation-dialog-container {
   color: var(--mat-sys-primary);

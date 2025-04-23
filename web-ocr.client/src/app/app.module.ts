@@ -12,6 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatListModule } from '@angular/material/list';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -22,6 +23,7 @@ import { RegisterComponent } from './register/register.component';
 import { AdminComponent } from './admin/admin.component';
 import { InvitationDialogComponent } from './invitation-dialog/invitation-dialog.component';
 import { environment } from '../environments/environment';
+import { AboutComponent } from './about/about.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -35,6 +37,7 @@ export function tokenGetter() {
     RegisterComponent,
     AdminComponent,
     InvitationDialogComponent,
+    AboutComponent,
   ],
   imports: [
     FormsModule,
@@ -57,6 +60,7 @@ export function tokenGetter() {
     MatIconModule,
     MatDialogModule,
     MatSnackBarModule,
+    MatListModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
