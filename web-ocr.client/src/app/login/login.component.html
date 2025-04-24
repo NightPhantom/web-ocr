@@ -21,7 +21,10 @@
         </div>
 
         <div class="button-container">
-          <button mat-raised-button type="submit" [disabled]="!loginForm.valid">Login</button>
+          <button mat-raised-button type="submit" [disabled]="!loginForm.valid || isLoading">
+            <span *ngIf="!isLoading">Login</span>
+            <mat-spinner *ngIf="isLoading" diameter="20" color="accent"></mat-spinner>
+          </button>
         </div>
 
       </form>

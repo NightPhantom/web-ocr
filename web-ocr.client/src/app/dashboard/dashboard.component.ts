@@ -18,6 +18,7 @@ export class DashboardComponent implements OnInit {
   selectedImage: string | null = null;
   ocrResponse: { text: string } | null = null;
   @ViewChild('resultContainer') resultContainer!: ElementRef;
+  isAnalyzing: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -48,6 +49,8 @@ export class DashboardComponent implements OnInit {
     this.ocrResponse = null;
     if (!this.selectedFile) return;
 
+    this.isAnalyzing = true;
+
     const formData = new FormData();
     formData.append('image', this.selectedFile);
 
@@ -61,6 +64,9 @@ export class DashboardComponent implements OnInit {
       error: (err) => {
         console.error('Error processing image.', err);
         this.ocrResponse = { text: 'Error processing the image.' };
+      },
+      complete: () => {
+        this.isAnalyzing = false;
       }
     });
   }

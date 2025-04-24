@@ -18,7 +18,10 @@
         <button mat-raised-button (click)="fileInput.click()">Choose Image File</button>
         <input #fileInput hidden type="file" (change)="onFileSelected($event)" accept="image/*" />
         <span *ngIf="selectedFile" class="file-name">{{selectedFile.name }}</span>
-        <button mat-raised-button (click)="uploadImage()" [disabled]="!selectedFile">Analyze</button>
+        <button mat-raised-button (click)="uploadImage()" [disabled]="!selectedFile || isAnalyzing">
+          <span *ngIf="!isAnalyzing">Analyse</span>
+          <mat-spinner *ngIf="isAnalyzing" diameter="20" color="accent"></mat-spinner>
+        </button>
       </div>
 
       <div *ngIf="selectedImage" class="image-preview-container">

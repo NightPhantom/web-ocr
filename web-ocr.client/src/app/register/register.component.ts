@@ -11,6 +11,8 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class RegisterComponent implements OnInit {
   registrationForm: FormGroup;
+  isLoading = false;
+
   constructor(private formBuilder: FormBuilder, private route: ActivatedRoute, private authService: AuthService) {
     this.registrationForm = this.formBuilder.group({
       username: ['', Validators.required],
@@ -30,8 +32,11 @@ export class RegisterComponent implements OnInit {
 
   onRegister(form: any): void {
     if (this.registrationForm.valid) {
+      this.isLoading = true;
       const { username, password, invitationCode } = form.value;
-      this.authService.register(username, password, invitationCode);
+      this.authService.register(username, password, invitationCode).add(() => {
+        this.isLoading = false;
+      })
     }
   }
 }

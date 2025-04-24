@@ -10,6 +10,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  isLoading = false;
 
   constructor(private formBuilder: FormBuilder, private authService: AuthService) {
     this.loginForm = this.formBuilder.group({
@@ -20,8 +21,11 @@ export class LoginComponent {
 
   onLogin(form: any): void {
     if (this.loginForm.valid) {
+      this.isLoading = true;
       const { username, password } = form.value;
-      this.authService.login(username, password);
+      this.authService.login(username, password).add(() => {
+        this.isLoading = false;
+      });
     }
   }
 }

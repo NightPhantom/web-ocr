@@ -28,7 +28,10 @@
         </div>
 
         <div class="button-container">
-          <button mat-raised-button type="submit" [disabled]="!registrationForm.valid">Register</button>
+          <button mat-raised-button type="submit" [disabled]="!registrationForm.valid || isLoading">
+            <span *ngIf="!isLoading">Register</span>
+            <mat-spinner *ngIf="isLoading" diameter="20" color="accent"></mat-spinner>
+          </button>
         </div>
 
       </form>
