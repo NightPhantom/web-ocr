@@ -38,6 +38,26 @@ export class AuthService {
     });
   }
 
+  changePassword(username: string, oldPassword: string, newPassword: string) {
+    return this.http.post<any>(`${this.apiBaseUrl}/change-password`, { username, oldPassword, newPassword }).subscribe({
+      next: (response) => {
+        this.snackBar.open('Password changed successfully.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
+      },
+      error: (err) => {
+        console.error('Error changing password', err);
+        this.snackBar.open('Error changing password.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
+      }
+    });
+  }
+
   isTokenExpired(): boolean {
     const token = localStorage.getItem('access_token');
     if (!token) return true;

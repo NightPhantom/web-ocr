@@ -8,6 +8,7 @@ import { RegisterComponent } from './register/register.component';
 import { AdminComponent } from './admin/admin.component';
 import { AboutComponent } from './about/about.component';
 import { AuthRedirectGuard } from './auth-redirect.guard';
+import { AccountComponent } from './account/account.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] },
   { path: 'about', component: AboutComponent },
+  { path: 'account', component: AccountComponent, canActivate: [AuthGuard] },
 ];
 
 @NgModule({

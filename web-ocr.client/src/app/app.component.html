@@ -12,6 +12,7 @@
       </ng-container>
       <ng-template #loggedIn>
         <button mat-button routerLink="/dashboard">Home</button>
+        <button mat-button routerLink="/account">Account</button>
         <button mat-button *ngIf="authService.isAdmin()" routerLink="/admin">Admin</button>
         <button mat-button routerLink="/about">About</button>
         <button mat-button (click)="logout()">Logout</button>

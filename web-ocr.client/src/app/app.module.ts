@@ -25,6 +25,7 @@ import { AdminComponent } from './admin/admin.component';
 import { InvitationDialogComponent } from './invitation-dialog/invitation-dialog.component';
 import { environment } from '../environments/environment';
 import { AboutComponent } from './about/about.component';
+import { AccountComponent } from './account/account.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -39,6 +40,7 @@ export function tokenGetter() {
     AdminComponent,
     InvitationDialogComponent,
     AboutComponent,
+    AccountComponent,
   ],
   imports: [
     FormsModule,

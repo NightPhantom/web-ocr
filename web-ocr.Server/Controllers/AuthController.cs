@@ -62,6 +62,32 @@ namespace web_ocr.Server.Controllers
             return Unauthorized();
         }
 
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] PasswordChangeRequest passwordChangeRequest)
+        {
+            // Find the user by username
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == passwordChangeRequest.Username);
+
+            if (user != null && user.Status == UserStatus.Active)
+            {
+                // Verify the password
+                var passwordVerification = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, passwordChangeRequest.OldPassword);
+                if (passwordVerification == PasswordVerificationResult.Success)
+                {
+                    // Hash the new password
+                    user.PasswordHash = _passwordHasher.HashPassword(user, passwordChangeRequest.NewPassword);
+
+                    await _context.SaveChangesAsync();
+
+                    // Return success
+                    return Ok();
+                }
+            }
+
+            return Unauthorized();
+        }
+
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {

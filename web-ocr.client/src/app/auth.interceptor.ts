@@ -10,9 +10,19 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-    // Prevent infite loop
-    if (request.url.includes('/api/Auth/')) {
+    // Skip appending access token for unauthenticated endpoints
+    const unauthenticatedEndpoints = [
+      '/api/Auth/login',
+      '/api/Auth/register'
+    ];
+
+    if (unauthenticatedEndpoints.some(endpoint => request.url.includes(endpoint))) {
       return next.handle(request);
+    }
+
+    // Special case for refresh token to prevent infinite loop
+    if (request.url.includes('/api/Auth/refresh-token')) {
+      return this.HandleRequest(request, next);
     }
 
     // Check if access token is expired
